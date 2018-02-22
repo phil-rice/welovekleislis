@@ -3,6 +3,7 @@ package org.validoc.kleislis
 import org.validoc.kleislis.KleisliLangauge._
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success, Try}
 
 case class IsItUpRequest(url: String)
 
@@ -28,8 +29,11 @@ object IsItUpResult {
   }
 
   implicit object MetricStateForIsItUpResult extends MetricState[IsItUpResult] {
-    val lookup = Map(false -> "down", true -> "up")
-    override def apply(isItUpResult: IsItUpResult): String = lookup(isItUpResult.up)
+    override def apply(isItUpResult: Try[IsItUpResult]): String = isItUpResult match {
+      case Success(IsItUpResult(_, true)) => "up"
+      case Success(IsItUpResult(_, false)) => "down"
+      case Failure(_) => "failed"
+    }
   }
 
 }
@@ -39,6 +43,6 @@ class IsItUpService(http: HttpRequest => Future[HttpResponse])(implicit toHttpRe
                                                                exceptionHandler: ExceptionHandler[IsItUpRequest, IsItUpResult],
                                                                metricState: MetricState[IsItUpResult],
                                                                recordMetricCount: RecordMetricCount, executionContext: ExecutionContext) {
-  def service: IsItUpRequest => Future[IsItUpResult] = http |+| Objectify[IsItUpRequest, IsItUpResult]() |+| Metrics("isItUp")
+  def service: IsItUpRequest => Future[IsItUpResult] = http |+| Objectify[IsItUpRequest, IsItUpResult]() |+| Metrics("isItUp") recoverFromException exceptionHandler
 
 }

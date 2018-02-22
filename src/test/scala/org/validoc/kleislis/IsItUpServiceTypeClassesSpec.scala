@@ -2,6 +2,8 @@ package org.validoc.kleislis
 
 import org.scalatest.{FlatSpec, Matchers}
 
+import scala.util.{Failure, Success}
+
 class IsItUpServiceTypeClassesSpec extends KleisliSpec {
 
   val isItUpRequest = IsItUpRequest("http://someHost/someUrl")
@@ -52,9 +54,12 @@ class IsItUpServiceTypeClassesSpec extends KleisliSpec {
   behavior of "MetricStateForIsItUpResult"
 
   it should "make a String 'up' when the result is up" in {
-    metricState(IsItUpResult("something", true)) shouldBe "up"
+    metricState(Success(IsItUpResult("something", true))) shouldBe "up"
   }
-  it should "make a String 'down' when the result is down" in {
-    metricState(IsItUpResult("something", false)) shouldBe "down"
+  it should "make a String 'down' when the 'IsItUpResult is down, and no exception was thrown" in {
+    metricState(Success(IsItUpResult("something", false)) )shouldBe "down"
+  }
+  it should "make a String 'failed' when an exception was thrown" in {
+    metricState(Failure(runtimeException) )shouldBe "failed"
   }
 }

@@ -67,7 +67,6 @@ class KleisliLanguageSpec extends KleisliSpec with MockitoSugar {
     val result = Console.withOut(new PrintStream(stream))(block)
     stream.toString("UTF-8").trim shouldBe expected
     result
-
   }
 
   it should "println the o/p" in {
@@ -75,11 +74,5 @@ class KleisliLanguageSpec extends KleisliSpec with MockitoSugar {
     checkPrintln("result: 2")(f(1)) shouldBe 2
   }
 
-  //  it should "call the passed in function with the try of the result of the kleisli" in {
-  //    val fn = mock[Try[Int] => Unit]
-  //    val k = MockFunction("a", Future.successful(1)) onSuccess  fn
-  //    k("a").futureValue
-  //    when(fn.apply(Success(1)))
-  //  }
 
 }
