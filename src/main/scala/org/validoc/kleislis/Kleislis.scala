@@ -1,7 +1,7 @@
 package org.validoc.kleislis
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 trait ErrorHandler[X, Y] extends (X => Option[Y])
 
@@ -23,6 +23,7 @@ trait KleisliLangauge {
     def andThenF[Res2](k2: Res => Res2): Req => Future[Res2] = { req: Req => k1(req).map(k2) }
     def andThenWithReq[Res2](k2: (Req, Res) => Res2): Req => Future[Res2] = { req: Req => k1(req).map(k2(req, _)) }
     def onComplete(fn: Try[Res] => Unit): Req => Future[Res] = { req: Req => k1(req).transform { tryRes => fn(tryRes); tryRes } }
+    def onCompleteWithReq(fn: (Req, Try[Res]) => Unit): Req => Future[Res] = { req: Req => k1(req).transform { tryRes => fn(req, tryRes); tryRes } }
     def debug(msg: String): Req => Future[Res] = { req: Req => k1(req).map { res => println(msg + res); res } }
 
     def recoverFromException(exceptionHandler: ExceptionHandler[Req, Res]): Req => Future[Res] = { req: Req =>

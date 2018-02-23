@@ -42,7 +42,8 @@ class IsItUpService(http: HttpRequest => Future[HttpResponse])(implicit toHttpRe
                                                                fromHttpResponse: FromHttpResponse[IsItUpRequest, IsItUpResult],
                                                                exceptionHandler: ExceptionHandler[IsItUpRequest, IsItUpResult],
                                                                metricState: MetricState[IsItUpResult],
+                                                               logConfig: LogConfig,
                                                                recordMetricCount: RecordMetricCount, executionContext: ExecutionContext) {
-  def service: IsItUpRequest => Future[IsItUpResult] = http |+| Objectify[IsItUpRequest, IsItUpResult]() |+| Metrics("isItUp") recoverFromException exceptionHandler
+  def service: IsItUpRequest => Future[IsItUpResult] = http |+| Objectify[IsItUpRequest, IsItUpResult]() |+| Metrics("isItUp") |+| Logging("isItUp") recoverFromException exceptionHandler
 
 }
